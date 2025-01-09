@@ -4,6 +4,25 @@
 
 Aplicación para la tarea de la asignatura de Programacion Multimedia.
 
+version 2.0
+
+Cambios realizados:
+-Logs para distintos eventos, para los eventos de abrir aplicacion,
+ cerrar aplicacion, low mwmory, cambio de orientacion de pantalla y
+ minimizar y restaurar aplicacion. DIUchos cambiuos se encuentran en una
+ nueva clase de aplicacion creada, llamada uR_BitApp, excepto el evento
+ de restaurar, ya que no encontre manera de aplicar el onResume() a la
+ clase, asi que lo apliqué a la activity main.
+
+-Añadidas dependencias de Room al gradle. Para el kps, utilizo la version
+ 1.0.24, que es la que corresponde a mi version de Kotlin 2.0.0
+
+-Modificado el archivo AndroidManifest, fijando la orientacion de la
+ main activity a portrait, declarando permisos de Internet y almacenamiento
+ y cambiando el nombre de la aplicacion
+	
+
+version 1.0
 
 **************** DESCRIPCION DE LA APLICACIÓN ************************
 
