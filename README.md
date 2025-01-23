@@ -4,6 +4,12 @@
 
 Aplicación para la tarea de la asignatura de Programacion Multimedia.
 
+version 3.0
+
+_añadida bSE DE DATOS SQLITE para guardar datos de usuarios
+
+-añadida base de datos ROOm para guardar informacion de anuncios
+
 version 2.0
 
 Cambios realizados:
