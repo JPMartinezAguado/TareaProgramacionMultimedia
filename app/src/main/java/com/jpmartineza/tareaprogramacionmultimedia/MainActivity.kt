@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -50,9 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -65,33 +65,71 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.jpmartineza.tareaprogramacionmultimedia.data.Anuncios
+import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosDB
+import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosDBDao
+import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosState
+import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosViewModel
+import com.jpmartineza.tareaprogramacionmultimedia.data.uRBitDBHelper
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     val TAG = "uR_BitApp"
+    private lateinit var dbHelper: uRBitDBHelper
+    private lateinit var db: AnunciosDB
+    private val viewModel: AnunciosViewModel by viewModels {
+        ViewModelFactory(AnunciosDB.getDatabase(this).anunciosDao())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaquetacionUI()
+            MaquetacionUI(viewModel)
         }
+        crearBD()
 
     }
 
+    private fun crearBD() {
+       dbHelper= uRBitDBHelper(this)
+
+        dbHelper.InsertarUsuario("admin","admin","admin")
+        dbHelper.InsertarUsuario("ONG","ONG","ONG")
+        dbHelper.InsertarUsuario("voluntario","voluntario","voluntario")
+    }
+
+    private fun InsertarAnuncios() {
+        val anuncios = AnunciosState.listadoAnuncios
+        anuncios.forEach { anuncio ->
+            viewModel.agregarAnuncio(anuncio)
+        }
+
+    }
     //tarea 2, parte 1, registrar cuandoi se restaura la activity
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "activity restaurada")
     }
 
+    override fun onDestroy() {
+        dbHelper.close()
+        super.onDestroy()
+    }
+
+
 }
 
+
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
+
 @Composable
 
-fun MaquetacionUI() {
+fun MaquetacionUI(viewModel: AnunciosViewModel) {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -113,7 +151,7 @@ fun MaquetacionUI() {
                          },
                 //content = {
                    // innerPadding -> Box(modifier = Modifier.padding(innerPadding)) {
-                content = {Cuerpo()},
+                content = {Cuerpo(AnunciosState.listadoAnuncios)},
                 bottomBar = { BarraInferior() }
 
             )
@@ -161,22 +199,20 @@ fun ToolBar(onMenuClick: () -> Unit) {
     )
 }
 
-@Preview
+
 @Composable
-fun Cuerpo() {
+fun Cuerpo(anuncios: List<Anuncios>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(30.dp, 40.dp, 30.dp, 5.dp)
     ) {
-        item {
-            Spacer(modifier = Modifier.height(60.dp))
-            repeat(14) { // Para evitar repetición manual
-                MuestraAnuncio()
+        items(anuncios){ anuncio ->
+                MuestraAnuncio(anuncios = anuncio)
             }
         }
     }
-}
+
 
 @Preview
 @Composable
@@ -331,15 +367,14 @@ fun Anuncio(
     }
 }
 
-@Preview(showBackground = true)
+
 @Composable
-fun MuestraAnuncio() {
+fun MuestraAnuncio(anuncios: Anuncios) {
     Anuncio(
-        foto = R.drawable.googlemaps ,
+        foto = anuncios.imagen,
         icono = R.drawable.baseline_favorite_border_24,
-        titulo = "TITULO DEL ANUNCIO",
-        texto = "Aquí va un texto de prueba. Dispone de scroll, por lo que puede contener varias lineas mas de las que se muestran." +
-                "Sin embargo, solo ira una pequeña descripcion y el resto de detalles se verán al abrir el anuncio",
+        titulo = anuncios.titulo,
+        texto = anuncios.descripcion,
         modifier = Modifier.fillMaxWidth()
     )
     Spacer(modifier = Modifier.height(5.dp))
@@ -373,3 +408,14 @@ fun ElementosNavLat(
 
 val cooperFontFamily = FontFamily(
     Font(R.font.cooper, FontWeight.Bold))
+
+class ViewModelFactory(
+    private val dao: AnunciosDBDao
+) : ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if(modelClass.isAssignableFrom(AnunciosViewModel::class.java)){
+        return super.create(modelClass) as T
+    }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}

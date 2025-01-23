@@ -42,6 +42,8 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.mediation.test.suite)
     //tarea 2, parte 2, instalacion de dependencias
     val room_version = "2.6.1"
 
