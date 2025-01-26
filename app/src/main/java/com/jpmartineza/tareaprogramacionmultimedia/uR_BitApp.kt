@@ -6,6 +6,8 @@ import android.util.Log
 
 class uR_BitApp : Application() {
 
+
+
     //tarea 2, parte 1, logs de rotar pantalla, cerar aplicacion, abrir aplicacion y poco memoria
     val TAG= "uR_BitApp"
 
