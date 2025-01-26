@@ -4,6 +4,11 @@
 
 Aplicación para la tarea de la asignatura de Programacion Multimedia.
 
+version 3.1.1
+- corregidas dependencias innecesarias y conflictivas (rerlacionadas con java y googleAds)
+- corregido generacion de anuncios desde la base de datos, derivadoa que la version3.0 estaba incompleta por
+  problemas de sincronicidad con github
+
 version 3.0
 
 _añadida bSE DE DATOS SQLITE para guardar datos de usuarios
