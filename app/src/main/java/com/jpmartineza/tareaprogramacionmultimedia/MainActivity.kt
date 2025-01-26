@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -67,48 +66,50 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
 import com.jpmartineza.tareaprogramacionmultimedia.data.Anuncios
 import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosDB
 import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosDBDao
 import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosState
 import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosViewModel
 import com.jpmartineza.tareaprogramacionmultimedia.data.uRBitDBHelper
+
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity() : ComponentActivity() {
 
     val TAG = "uR_BitApp"
     private lateinit var dbHelper: uRBitDBHelper
-    private lateinit var db: AnunciosDB
-    private val viewModel: AnunciosViewModel by viewModels {
-        ViewModelFactory(AnunciosDB.getDatabase(this).anunciosDao())
-    }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaquetacionUI(viewModel)
+            val database = Room.databaseBuilder(this, AnunciosDB::class.java, "AnunciosDB").build()
+            val dao = database.anunciosDao()
+            val viewModel = AnunciosViewModel(dao)
+            val navController = rememberNavController()
+
+            MaquetacionUI(navController = NavHostController(this), viewModel)
         }
         crearBD()
 
     }
 
     private fun crearBD() {
-       dbHelper= uRBitDBHelper(this)
+        dbHelper = uRBitDBHelper(this)
 
-        dbHelper.InsertarUsuario("admin","admin","admin")
-        dbHelper.InsertarUsuario("ONG","ONG","ONG")
-        dbHelper.InsertarUsuario("voluntario","voluntario","voluntario")
+        dbHelper.InsertarUsuario("admin", "admin", "admin")
+        dbHelper.InsertarUsuario("ONG", "ONG", "ONG")
+        dbHelper.InsertarUsuario("voluntario", "voluntario", "voluntario")
     }
 
-    private fun InsertarAnuncios() {
-        val anuncios = AnunciosState.listadoAnuncios
-        anuncios.forEach { anuncio ->
-            viewModel.agregarAnuncio(anuncio)
-        }
 
-    }
     //tarea 2, parte 1, registrar cuandoi se restaura la activity
     override fun onResume() {
         super.onResume()
@@ -120,38 +121,38 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
     }
 
+    companion object
+
 
 }
 
 
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-
 @Composable
-
-fun MaquetacionUI(viewModel: AnunciosViewModel) {
+fun MaquetacionUI(navController: NavHostController, viewModel: AnunciosViewModel) {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { NavegadorLateral(Modifier.width(Dp(200f))) },
+        drawerContent = { NavegadorLateral(navController,Modifier.width(Dp(200f))) },
         content = {
             Scaffold(
-                topBar = { ToolBar(onMenuClick = {
-                    scope.launch {
-                        if (drawerState.isOpen) {
-                            drawerState.close()
-                        } else {
-                            drawerState.open()
+                topBar = {
+                    ToolBar(onMenuClick = {
+                        scope.launch {
+                            if (drawerState.isOpen) {
+                                drawerState.close()
+                            } else {
+                                drawerState.open()
+                            }
                         }
-                    }
-                })
-                         },
+                    })
+                },
                 //content = {
-                   // innerPadding -> Box(modifier = Modifier.padding(innerPadding)) {
-                content = {Cuerpo(AnunciosState.listadoAnuncios)},
+                // innerPadding -> Box(modifier = Modifier.padding(innerPadding)) {
+                content = { Cuerpo(AnunciosState.listadoAnuncios) },
                 bottomBar = { BarraInferior() }
 
             )
@@ -182,7 +183,7 @@ fun ToolBar(onMenuClick: () -> Unit) {
         },
         actions =
         {
-            IconButton(onClick = {}){
+            IconButton(onClick = {}) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Account",
@@ -207,16 +208,16 @@ fun Cuerpo(anuncios: List<Anuncios>) {
             .fillMaxSize()
             .padding(30.dp, 40.dp, 30.dp, 5.dp)
     ) {
-        items(anuncios){ anuncio ->
-                MuestraAnuncio(anuncios = anuncio)
-            }
+        items(anuncios) { anuncio ->
+            MuestraAnuncio(anuncios = anuncio)
         }
     }
+}
 
 
 @Preview
 @Composable
-fun  BarraInferior() {
+fun BarraInferior() {
     BottomAppBar(
         containerColor = Color.DarkGray,
         contentColor = Color.White,
@@ -253,21 +254,20 @@ fun  BarraInferior() {
 }
 
 @Composable
-fun NavegadorLateral(modifier: Modifier = Modifier)
-{
+fun NavegadorLateral(navController: NavHostController, modifier: Modifier = Modifier) {
 
     Column(
         modifier = Modifier
             .padding(0.dp)
             .background(Color.White, RectangleShape)
-    ){
+    ) {
         Box(
             modifier = Modifier
                 .width(250.dp)
                 .padding(top = 50.dp, bottom = 10.dp)
                 .clip(RoundedCornerShape(9.dp))
                 .padding(0.dp)
-        ){
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.brand_logo),
                 contentDescription = null,
@@ -277,9 +277,15 @@ fun NavegadorLateral(modifier: Modifier = Modifier)
                     .align(Alignment.Center)
             )
         }
-        ElementosNavLat(icono = Icons.Default.Search, nombre = "Buscador")
-        ElementosNavLat(icono = Icons.Default.Favorite, nombre = "Favoritos")
-        ElementosNavLat(icono = Icons.Default.Create, nombre = "Crear")
+        ElementosNavLat(icono = Icons.Default.Search, nombre = "Buscador") {
+            navController.navigate("BuscarAnuncio")
+        }
+        ElementosNavLat(icono = Icons.Default.Favorite, nombre = "Favoritos", function = {
+            navController.navigate("agregarAnuncio")
+        })
+        ElementosNavLat(icono = Icons.Default.Create, nombre = "Crear", function = {
+            navController.navigate("agregarAnuncio")
+        })
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -287,7 +293,7 @@ fun NavegadorLateral(modifier: Modifier = Modifier)
             modifier = Modifier
                 .width(70.dp)
                 .clip(RoundedCornerShape(9.dp))
-        ){
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = null,
@@ -298,11 +304,15 @@ fun NavegadorLateral(modifier: Modifier = Modifier)
         }
 
 
-        ElementosNavLat(icono = Icons.Default.Email, nombre = "Email")
-        ElementosNavLat(icono = Icons.Default.AccountCircle, nombre = "Mi cuenta")
+        ElementosNavLat(icono = Icons.Default.Email, nombre = "Email", function = {
+            navController.navigate("search")
+        })
+        ElementosNavLat(icono = Icons.Default.AccountCircle, nombre = "Mi cuenta", function = {
+            navController.navigate("search")
+        })
         Text(
             text = "Powered by Meº",
-            Modifier.padding(start = 130.dp, top =30.dp),
+            Modifier.padding(start = 130.dp, top = 30.dp),
             color = Color.DarkGray,
             fontFamily = FontFamily.Default,
             fontStyle = FontStyle.Italic,
@@ -310,6 +320,58 @@ fun NavegadorLateral(modifier: Modifier = Modifier)
         )
         Spacer(modifier = Modifier.height(20.dp))
 
+    }
+}
+
+@Composable
+fun NavegadorLateral(navController: NavController, modifier: Modifier = Modifier) {
+    Column(
+        modifier = Modifier
+            .padding(0.dp)
+            .background(Color.White, RectangleShape)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(250.dp)
+                .padding(top = 50.dp, bottom = 10.dp)
+                .clip(RoundedCornerShape(9.dp))
+                .padding(0.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.brand_logo),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(3.dp)
+                    .align(Alignment.Center)
+            )
+        }
+
+        ElementosNavLat(icono = Icons.Default.Search, nombre = "Buscador") {
+            navController.navigate("search")
+        }
+        ElementosNavLat(icono = Icons.Default.Favorite, nombre = "Favoritos") {
+            navController.navigate("favorites")
+        }
+        ElementosNavLat(icono = Icons.Default.Create, nombre = "Crear") {
+            navController.navigate("create")
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Box(
+            modifier = Modifier
+                .width(70.dp)
+                .clip(RoundedCornerShape(9.dp))
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(3.dp)
+                    .align(Alignment.TopStart)
+            )
+        }
     }
 }
 
@@ -333,7 +395,7 @@ fun Anuncio(
                 .padding(10.dp)
         ) {
             Image(
-                painter = painterResource(id = foto),
+                painter = painterResource(id =foto),
                 contentDescription = null,
                 modifier = Modifier
                     .clip(RoundedCornerShape(9.dp))
@@ -382,13 +444,14 @@ fun MuestraAnuncio(anuncios: Anuncios) {
 
 @Composable
 fun ElementosNavLat(
-    icono : ImageVector,
-    nombre: String
-){
-    Row (
+    icono: ImageVector,
+    nombre: String,
+    function: () -> Unit
+) {
+    Row(
         modifier = Modifier
             .padding(4.dp)
-    ){
+    ) {
         Icon(
             imageVector = icono,
             contentDescription = null,
@@ -407,15 +470,16 @@ fun ElementosNavLat(
 }
 
 val cooperFontFamily = FontFamily(
-    Font(R.font.cooper, FontWeight.Bold))
+    Font(R.font.cooper, FontWeight.Bold)
+)
 
 class ViewModelFactory(
     private val dao: AnunciosDBDao
-) : ViewModelProvider.Factory{
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if(modelClass.isAssignableFrom(AnunciosViewModel::class.java)){
-        return super.create(modelClass) as T
-    }
+        if (modelClass.isAssignableFrom(AnunciosViewModel::class.java)) {
+            return super.create(modelClass) as T
+        }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

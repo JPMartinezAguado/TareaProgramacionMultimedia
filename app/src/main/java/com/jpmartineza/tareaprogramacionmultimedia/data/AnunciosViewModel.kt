@@ -16,25 +16,25 @@ class AnunciosViewModel(
 
     init {
         viewModelScope.launch {
-            dao.obtenerAnuncios().collect() { anuncios ->
+            dao.obtenerAnuncios().collectLatest() {
                 state = state.copy(
-                    anuncios = anuncios
+                    anuncios = it
                 )
             }
         }
     }
 
-    fun agregarAnuncio(anuncio: Anuncios) = viewModelScope.launch {
-        dao.insertarAnuncio(anuncio)
+    fun insertarAnuncio(anuncio: Anuncios) = viewModelScope.launch {
+        dao.insertarAnuncio(anuncio = anuncio)
 
     }
 
     fun eliminarAnuncio(anuncio: Anuncios) = viewModelScope.launch {
-        dao.eliminarAnuncio(anuncio)
+        dao.eliminarAnuncio(anuncio = anuncio)
     }
 
     fun actualizarAnuncio(anuncio: Anuncios) = viewModelScope.launch {
-        dao.actualizarAnuncio(anuncio)
+        dao.actualizarAnuncio(anuncio = anuncio)
     }
 
 
