@@ -2,8 +2,10 @@ package com.jpmartineza.tareaprogramacionmultimedia.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -16,24 +18,26 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.jpmartineza.tareaprogramacionmultimedia.data.room.Anuncios
+import com.jpmartineza.tareaprogramacionmultimedia.data.network.RetrofitClient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BuscarAnuncioView(navController: NavHostController, viewModel: AnunciosViewModel) {
+fun Chistako(navController: NavHostController, viewModel: ChistakoViewModel = hiltViewModel()) {
     Scaffold (
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "Funcion No implementada") },
+                title = { Text(text = "Chistaco del dia") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack()}
                     ) {
@@ -45,29 +49,23 @@ fun BuscarAnuncioView(navController: NavHostController, viewModel: AnunciosViewM
                 }
             )
         }
-    ){
-        BuscarAnuncioContent(it, navController, viewModel)
+    )
+    {
+        ChistakoContent(it, navController, viewModel)
 
     }
 
 }
 
 
+
 @Composable
-fun BuscarAnuncioContent(
+fun ChistakoContent(
     it: PaddingValues,
     navController: NavHostController,
-    viewModel: AnunciosViewModel
+    viewModel: ChistakoViewModel
 ) {
-    var titulo by remember { mutableStateOf("") }
-    var descripcion by remember { mutableStateOf("") }
-    var imagen by remember { mutableStateOf("") }
-    var tipo by remember { mutableStateOf("") }
-    var ubicacion by remember { mutableStateOf("") }
-    var fechaPublicacion by remember { mutableStateOf("") }
-    var fechaAccion by remember { mutableStateOf("") }
-
-    val context = LocalContext.current
+    val chiste by viewModel.chiste.collectAsState()
 
     Column(
         modifier = Modifier
@@ -76,50 +74,19 @@ fun BuscarAnuncioContent(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-
-        OutlinedTextField(
-            value = tipo,
-            onValueChange = {tipo = it},
-            label = { Text(text = "Tipo") },
+        Text(
+            text = chiste,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
                 .padding(bottom = 15.dp)
         )
-
-        OutlinedTextField(
-            value = ubicacion,
-            onValueChange = {ubicacion = it},
-            label = { Text(text = "Ubicacion") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
-        )
-
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
-
-                val resourceId = context.resources.getIdentifier(imagen, "drawable", context.packageName)
-                val anuncio = Anuncios(
-                    titulo = titulo,
-                    descripcion = descripcion,
-                    imagen = resourceId,
-                    tipo = tipo,
-                    poblacion = ubicacion,
-                    fechaPublicacion = fechaPublicacion,
-                    fechaAccion = fechaAccion
-                )
-
-                viewModel.insertarAnuncio(anuncio)
-                navController.popBackStack()
+                viewModel.obtenerChisteAleatorio()
             }
-        ) {
-            Text(text = "Guardar")
-        }
-
+        ) { Text(text = "Dámelo!") }
     }
-
 }

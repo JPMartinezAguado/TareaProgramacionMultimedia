@@ -1,13 +1,14 @@
-package com.jpmartineza.tareaprogramacionmultimedia.data
+package com.jpmartineza.tareaprogramacionmultimedia.data.room
 
 import com.jpmartineza.tareaprogramacionmultimedia.R
+import kotlinx.coroutines.flow.Flow
 
 
 data class AnunciosState(
     val anuncios: List<Anuncios> = emptyList()
 ) {
     companion object {
-        val listadoAnuncios: List<Anuncios> = listOf(
+       internal var _listadoAnuncios= mutableListOf(
 
             Anuncios(
                 titulo = "Ayuda a mi perro",
@@ -109,6 +110,15 @@ data class AnunciosState(
         imagen = R.drawable.comedorsocial
         )
         )
+        
+        val listadoAnuncios: List<Anuncios>
+        get() = _listadoAnuncios
+
+
+
+        fun agregarAnuncio(anuncio: Anuncios) {
+            _listadoAnuncios.add(anuncio)
+        }
 
     }
 

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.res.Configuration
 import android.util.Log
 
+@HiltAndroidApp
 class uR_BitApp : Application() {
 
 

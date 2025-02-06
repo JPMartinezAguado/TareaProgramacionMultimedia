@@ -1,14 +1,19 @@
 package com.jpmartineza.tareaprogramacionmultimedia.ui
 
+import android.content.Context
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,8 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.jpmartineza.tareaprogramacionmultimedia.data.Anuncios
-import com.jpmartineza.tareaprogramacionmultimedia.data.AnunciosViewModel
+import com.jpmartineza.tareaprogramacionmultimedia.R
+import com.jpmartineza.tareaprogramacionmultimedia.data.room.Anuncios
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +57,10 @@ fun AgregarAnuncioView(navController: NavHostController, viewModel: AnunciosView
     }
 
 }
+fun obtenerNombresDeImagenes(context: Context): List<String> {
+    val drawables = R.drawable::class.java.fields
+    return drawables.map { it.name }
+}
 
 @Composable
 fun AgregarAnuncioContent(
@@ -61,13 +70,16 @@ fun AgregarAnuncioContent(
 ) {
     var titulo by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var imagen by remember { mutableStateOf("") }
+    var imagenSeleccionada by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf("") }
     var ubicacion by remember { mutableStateOf("") }
     var fechaPublicacion by remember { mutableStateOf("") }
     var fechaAccion by remember { mutableStateOf("") }
 
     val context = LocalContext.current
+    val nombresDeImagenes = obtenerNombresDeImagenes(context)
+
+    var expanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -78,8 +90,8 @@ fun AgregarAnuncioContent(
     ) {
         OutlinedTextField(
             value = titulo,
-            onValueChange = {titulo = it},
-            label = { Text(text = "Titulo")},
+            onValueChange = { titulo = it },
+            label = { Text(text = "Titulo") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -88,28 +100,63 @@ fun AgregarAnuncioContent(
 
         OutlinedTextField(
             value = descripcion,
-            onValueChange = {descripcion = it},
-            label = { Text(text = "Descripcion")},
+            onValueChange = { descripcion = it },
+            label = { Text(text = "Descripcion") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
                 .padding(bottom = 15.dp)
         )
 
-        OutlinedTextField(
-            value = imagen,
-            onValueChange = {imagen = it},
-            label = { Text(text = "Imagen")},
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
-                .padding(bottom = 15.dp)
-        )
+        ) {
+            OutlinedTextField(
+                value = imagenSeleccionada,
+                onValueChange = {},
+                label = { Text(text = "Imagen") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+                }
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                nombresDeImagenes.forEach { nombreDeImagen ->
+                    DropdownMenuItem(
+                        text = { Text(text = nombreDeImagen) },
+                        onClick = {
+                            imagenSeleccionada = nombreDeImagen
+                            expanded = false
+                        }
+                    )
+                    }
+                }
+            }
+
+
+
+//        OutlinedTextField(
+//            value = imagen,
+//            onValueChange = {imagen = it},
+//            label = { Text(text = "Imagen")},
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 30.dp)
+//                .padding(bottom = 15.dp)
+//        )
 
         OutlinedTextField(
             value = tipo,
-            onValueChange = {tipo = it},
-            label = { Text(text = "Tipo")},
+            onValueChange = { tipo = it },
+            label = { Text(text = "Tipo") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -118,8 +165,8 @@ fun AgregarAnuncioContent(
 
         OutlinedTextField(
             value = ubicacion,
-            onValueChange = {ubicacion = it},
-            label = { Text(text = "Ubicacion")},
+            onValueChange = { ubicacion = it },
+            label = { Text(text = "Ubicacion") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -128,8 +175,8 @@ fun AgregarAnuncioContent(
 
         OutlinedTextField(
             value = fechaPublicacion,
-            onValueChange = {fechaPublicacion = it},
-            label = { Text(text = "Fecha Publicacion")},
+            onValueChange = { fechaPublicacion = it },
+            label = { Text(text = "Fecha Publicacion") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -137,8 +184,8 @@ fun AgregarAnuncioContent(
         )
         OutlinedTextField(
             value = fechaAccion,
-            onValueChange = {fechaAccion = it},
-            label = { Text(text = "Fecha Accion")},
+            onValueChange = { fechaAccion = it },
+            label = { Text(text = "Fecha Accion") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -147,7 +194,12 @@ fun AgregarAnuncioContent(
 
         Button(
             onClick = {
-                val resourceId = context.resources.getIdentifier(imagen, "drawable", context.packageName)
+                val resourceId = context.resources.getIdentifier(
+                    imagenSeleccionada,
+                    "drawable",
+                    context.packageName
+                )
+
 
                 val anuncio = Anuncios(
                     titulo = titulo,
@@ -167,5 +219,6 @@ fun AgregarAnuncioContent(
         }
 
     }
-
 }
+
+

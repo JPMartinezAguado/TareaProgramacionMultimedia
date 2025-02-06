@@ -1,0 +1,3 @@
+package com.jpmartineza.tareaprogramacionmultimedia
+
+annotation class AndroidEntryPoint

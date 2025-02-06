@@ -1,11 +1,11 @@
-package com.jpmartineza.tareaprogramacionmultimedia.data
+package com.jpmartineza.tareaprogramacionmultimedia.data.sqlite
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.jpmartineza.tareaprogramacionmultimedia.data.uRBitDBContract.SQL_CREATE_ENTRIES
-import com.jpmartineza.tareaprogramacionmultimedia.data.uRBitDBContract.SQL_DELETE_ENTRIES
+import com.jpmartineza.tareaprogramacionmultimedia.data.sqlite.uRBitDBContract.SQL_CREATE_ENTRIES
+import com.jpmartineza.tareaprogramacionmultimedia.data.sqlite.uRBitDBContract.SQL_DELETE_ENTRIES
 
 class uRBitDBHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {

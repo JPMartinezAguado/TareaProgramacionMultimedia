@@ -1,11 +1,11 @@
-package com.jpmartineza.tareaprogramacionmultimedia.data
+package com.jpmartineza.tareaprogramacionmultimedia.data.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "anuncios")
-data class Anuncios(
+class Anuncios(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo("titulo") val titulo: String,
     @ColumnInfo("descripcion") val descripcion: String,
@@ -13,8 +13,5 @@ data class Anuncios(
     @ColumnInfo("fechaAccion") val fechaAccion: String,
     @ColumnInfo("poblacion") val poblacion: String,
     @ColumnInfo("tipo") val tipo: String,
-    @ColumnInfo("imagen") val imagen: Int
-)
-
-
-
+    @ColumnInfo("imagen") val imagen: Int,
+    )
