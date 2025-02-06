@@ -4,6 +4,18 @@
 
 Aplicación para la tarea de la asignatura de Programacion Multimedia.
 
+version 4.0
+
+-Añadidas dependencias de Hilt
+
+-Encapusluada logica de DB y chistes en ViewMOdel, con uso de StateFlow 
+
+-Acceso a una Api de chistes de Chuck Norris usando Retrofit, accesible desde el menu lateral
+
+-Activities y ViewModels inyectados con Hilt para automatizar las dependencias
+
+-Corregido menu de creacion de anuncios. La imagen se selecciona de un desplegable para evitar erro en caso de introducir un nombre de imagen que no correspondiese con alguna de las guardadas en drawable.
+
 version 3.1.1
 - corregidas dependencias innecesarias y conflictivas (rerlacionadas con java y googleAds)
 - corregido generacion de anuncios desde la base de datos, derivadoa que la version3.0 estaba incompleta por
