@@ -1,14 +1,18 @@
-package com.jpmartineza.tareaprogramacionmultimedia.data
+package com.jpmartineza.tareaprogramacionmultimedia.data.room
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AnunciosDBDao {
+
+    @Query("SELECT COUNT(*) FROM anuncios")
+    suspend fun obtenerCuentaAnuncios(): Int
 
     @Query("SELECT * FROM anuncios")
     fun obtenerAnuncios(): Flow<List<Anuncios>>
@@ -22,8 +26,11 @@ interface AnunciosDBDao {
     @Query("SELECT * FROM anuncios WHERE poblacion = :poblacion")
     fun obtenerAnunciosPorPoblacion(poblacion: String): Flow<List<Anuncios>>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarAnuncio(anuncio: Anuncios)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarAnuncios(anuncios: List<Anuncios>)
 
     @Update
     suspend fun actualizarAnuncio(anuncio: Anuncios)

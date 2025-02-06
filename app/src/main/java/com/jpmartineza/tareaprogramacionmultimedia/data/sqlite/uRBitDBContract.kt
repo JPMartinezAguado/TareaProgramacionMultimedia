@@ -1,4 +1,4 @@
-package com.jpmartineza.tareaprogramacionmultimedia.data
+package com.jpmartineza.tareaprogramacionmultimedia.data.sqlite
 
 import android.provider.BaseColumns
 
