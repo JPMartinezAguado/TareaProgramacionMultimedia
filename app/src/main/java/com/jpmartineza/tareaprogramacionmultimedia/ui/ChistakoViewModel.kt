@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jpmartineza.tareaprogramacionmultimedia.data.network.RetrofitClient
 import com.jpmartineza.tareaprogramacionmultimedia.data.network.ChisteService
+import com.jpmartineza.tareaprogramacionmultimedia.domain.obtenerChisteUserCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,28 +13,27 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ChistakoViewModel @Inject constructor(private val client: RetrofitClient): ViewModel() {
+class ChistakoViewModel @Inject constructor(private val obtenerChisteUserCase: obtenerChisteUserCase): ViewModel() {
 
-    private val _chiste = MutableStateFlow("...se viene chistaco...")
+    private val _chiste = MutableStateFlow("")
     val chiste: StateFlow<String> get() = _chiste
-
-    private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> get() = _loading
 
     fun obtenerChisteAleatorio() {
         viewModelScope.launch {
-            _loading.value = true
-            try {
-                val chisteResponse = client.service.obtenerChisteAleatorio()
-                _chiste.value = chisteResponse.value
+            Log.d("chiste", "Llamada a obtenerChisteAleatorio() iniciada")
+           try {
+                obtenerChisteUserCase.execute()
+                Log.d("chiste", "Chiste obtenido: $chiste")
+
             } catch (e: Exception) {
                 _chiste.value = "Error al obtener el chiste"
-                Log.e("ChistakoViewModel", "Error al obtener el chiste", e)
             }
-            _loading.value = false
+
         }
-        }
+
     }
+}
+
 
 
 

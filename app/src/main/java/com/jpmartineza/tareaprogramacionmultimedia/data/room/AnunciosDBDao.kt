@@ -15,7 +15,7 @@ interface AnunciosDBDao {
     suspend fun obtenerCuentaAnuncios(): Int
 
     @Query("SELECT * FROM anuncios")
-    fun obtenerAnuncios(): Flow<List<Anuncios>>
+    fun obtenerTodosAnuncios(): Flow<List<Anuncios>>
 
     @Query("SELECT * FROM anuncios ORDER BY fechaPublicacion DESC")
     fun obtenerAnunciosPorFecha(): Flow<List<Anuncios>>
@@ -37,6 +37,8 @@ interface AnunciosDBDao {
 
     @Delete
     suspend fun eliminarAnuncio(anuncio: Anuncios)
+
+
 
 
 

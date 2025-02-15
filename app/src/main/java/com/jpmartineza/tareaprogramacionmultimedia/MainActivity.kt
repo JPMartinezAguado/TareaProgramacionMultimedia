@@ -2,7 +2,6 @@ package com.jpmartineza.tareaprogramacionmultimedia
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,12 +28,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
@@ -64,56 +63,56 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
 import com.jpmartineza.tareaprogramacionmultimedia.data.room.Anuncios
-import com.jpmartineza.tareaprogramacionmultimedia.data.room.AnunciosDB
-import com.jpmartineza.tareaprogramacionmultimedia.ui.AnunciosViewModel
 import com.jpmartineza.tareaprogramacionmultimedia.data.sqlite.uRBitDBHelper
 import com.jpmartineza.tareaprogramacionmultimedia.navegacion.NavManager
-import com.jpmartineza.tareaprogramacionmultimedia.ui.ChistakoViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.jpmartineza.tareaprogramacionmultimedia.ui.AnunciosViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 
 @AndroidEntryPoint
 class MainActivity() : ComponentActivity() {
 
-    val TAG = "uR_BitApp"
+
     private lateinit var dbHelper: uRBitDBHelper
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val database = Room.databaseBuilder(applicationContext, AnunciosDB::class.java, "AnunciosDB").build()
-            val dao = database.anunciosDao()
-            val viewModel = AnunciosViewModel(dao)
-
-            withContext(Dispatchers.Main) {
-                setContent {
-                    val navController = rememberNavController()
-                    NavManager(viewModel = viewModel)
-                }
-            }
+        setContent {
+            val anunciosViewModel: AnunciosViewModel = hiltViewModel()
+            NavManager(anunciosViewModel)
         }
         crearBD()
-
     }
 
+
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//
+//
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val database = Room.databaseBuilder(applicationContext, AnunciosDB::class.java, "AnunciosDB").build()
+//            val dao = database.anunciosDao()
+//            val viewModel = AnunciosViewModel(
+//                getAnuncios = GetAnunciosUserCase(AnunciossRepositorio()),
+//                addAnuncio = AddAnuncioUserCase(AnunciossRepositorio()),
+//                removeAnuncio = RemoveAnuncioUserCase(AnunciossRepositorio()),
+//                dao = dao)
+//
+//            withContext(Dispatchers.Main) {
+//                setContent {
+//                    //val navController = rememberNavController()
+//                    NavManager(viewModel = hiltViewModel())
+//                }
+//            }
+//        }
+//        crearBD()
 
 
     private fun crearBD() {
@@ -123,43 +122,37 @@ class MainActivity() : ComponentActivity() {
         dbHelper.InsertarUsuario("ONG", "ONG", "ONG")
         dbHelper.InsertarUsuario("voluntario", "voluntario", "voluntario")
     }
-
-
-    //tarea 2, parte 1, registrar cuandoi se restaura la activity
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "activity restaurada")
-
-
-    }
-
-    override fun onDestroy() {
-        dbHelper.close()
-        super.onDestroy()
-    }
-
-    companion object
-
-
 }
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MaquetacionUI(navController: NavHostController, viewModel: AnunciosViewModel) {
+fun MaquetacionUI( navController: NavHostController, viewModel: AnunciosViewModel) {
 
-    val anunciosState by viewModel.anunciosState.collectAsState()
+
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
     val scope = rememberCoroutineScope()
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { NavegadorLateral(navController,Modifier.width(Dp(200f))) },
+        drawerContent= {
+            Box(
+                modifier = Modifier
+                   .fillMaxWidth(0.7f)
+                    .fillMaxHeight()
+                   .padding(bottom = 80.dp)
+                   .background(Color.White)
+        ){
+                NavegadorLateral(navController)
+            }
+        },
         content = {
             Scaffold(
                 topBar = {
-                    ToolBar(onMenuClick = {
+                    ToolBar(navController, onMenuClick = {
                         scope.launch {
                             if (drawerState.isOpen) {
                                 drawerState.close()
@@ -172,16 +165,17 @@ fun MaquetacionUI(navController: NavHostController, viewModel: AnunciosViewModel
                 //content = {
                 // innerPadding -> Box(modifier = Modifier.padding(innerPadding)) {
                 content = { Cuerpo(anuncios = viewModel.anunciosState.map { it.anuncios }) },
-                bottomBar = { BarraInferior() }
-
+                bottomBar = { BarraInferior(navController) }
             )
-        }
+        },
+        //modifier = Modifier.width(if (drawerState.isOpen) 1.dp else 0.dp)
     )
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolBar(onMenuClick: () -> Unit) {
+fun ToolBar(navController: NavHostController, onMenuClick: () -> Unit) {
     CenterAlignedTopAppBar(
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
@@ -202,7 +196,7 @@ fun ToolBar(onMenuClick: () -> Unit) {
         },
         actions =
         {
-            IconButton(onClick = {}) {
+            IconButton(onClick = { navController.navigate("MiCuenta") }) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Account",
@@ -215,7 +209,7 @@ fun ToolBar(onMenuClick: () -> Unit) {
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.DarkGray),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(0.dp, 0.dp, 0.dp, 10.dp)
+            .padding(0.dp, 0.dp, 0.dp, 0.dp)
     )
 }
 
@@ -227,7 +221,7 @@ fun Cuerpo(anuncios: Flow<List<Anuncios>>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(30.dp, 40.dp, 30.dp, 5.dp)
+            .padding(40.dp, 65.dp, 30.dp, 80.dp)
     ) {
         items(anunciosList) { anuncio ->
             MuestraAnuncio(anuncios = anuncio)
@@ -237,55 +231,63 @@ fun Cuerpo(anuncios: Flow<List<Anuncios>>) {
 
 
 
-@Preview
 @Composable
-fun BarraInferior() {
+fun BarraInferior(navController: NavHostController) {
     BottomAppBar(
         containerColor = Color.DarkGray,
         contentColor = Color.White,
-        modifier = Modifier.height(100.dp),
+        modifier = Modifier.height(80.dp),
         content = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "email",
-                    tint = Color.White
-                )
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Casa",
-                    tint = Color.White
-                )
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "anadir",
-                    tint = Color.White
-                )
-
-
+                IconButton(onClick = {
+                    navController.navigate("Inicio")
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refrescar",
+                        tint = Color.White
+                    )
+                }
+                IconButton(onClick = {
+                    navController.navigate("Inicio")
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = "Home",
+                        tint = Color.White
+                    )
+                }
+                IconButton(onClick = {
+                    navController.navigate("agregarAnuncio")
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Añadir",
+                        tint = Color.White
+                    )
+                }
             }
-
         }
     )
-
-
 }
 
+
 @Composable
-fun NavegadorLateral(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavegadorLateral (navController: NavHostController, modifier: Modifier = Modifier) {
 
     Column(
         modifier = Modifier
-            .padding(0.dp)
+            .fillMaxHeight()
+            //.padding(end = 60.dp,bottom = 80.dp)
             .background(Color.White, RectangleShape)
     ) {
         Box(
             modifier = Modifier
-                .width(250.dp)
+                .fillMaxWidth(0.9f)
                 .padding(top = 50.dp, bottom = 10.dp)
                 .clip(RoundedCornerShape(9.dp))
                 .padding(0.dp)
@@ -299,16 +301,16 @@ fun NavegadorLateral(navController: NavHostController, modifier: Modifier = Modi
                     .align(Alignment.Center)
             )
         }
-        ElementosNavLat(icono = Icons.Default.Search, nombre = "Buscador") {
-            navController.navigate("BuscarAnuncio")
-        }
-        ElementosNavLat(icono = Icons.Default.Favorite, nombre = "Crear") {
-            navController.navigate("agregarAnuncio")
+        ElementosNavLat(icono = Icons.Default.Delete, nombre = "Eliminar") {
+            navController.navigate("BorrarAnuncio")
         }
         ElementosNavLat(icono = Icons.Default.Create, nombre = "Crear") {
             navController.navigate("agregarAnuncio")
         }
 
+        //ElementosNavLat(icono = Icons.Default.Favorite, nombre = "Crear") {
+        //    navController.navigate("agregarAnuncio")
+        //}
         Spacer(modifier = Modifier.weight(1f))
 
         Box(
@@ -332,17 +334,17 @@ fun NavegadorLateral(navController: NavHostController, modifier: Modifier = Modi
 
         }
         ElementosNavLat(icono = Icons.Default.AccountCircle, nombre = "Mi cuenta"){
-            navController.navigate("search")
+            navController.navigate("MiCuenta")
         }
         Text(
             text = "Powered by Meº",
-            Modifier.padding(start = 130.dp, top = 30.dp),
+            Modifier.padding(start = 80.dp, top = 30.dp, bottom = 10.dp),
             color = Color.DarkGray,
             fontFamily = FontFamily.Default,
             fontStyle = FontStyle.Italic,
             textAlign = TextAlign.Right
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        //Spacer(modifier = Modifier.height(20.dp))
 
     }
 }
@@ -355,6 +357,7 @@ fun NavegadorLateral(navController: NavHostController, modifier: Modifier = Modi
 //    }
 //
 //}
+
 
 @Composable
 fun Anuncio(
@@ -454,11 +457,3 @@ fun ElementosNavLat(
 val cooperFontFamily = FontFamily(
     Font(R.font.cooper, FontWeight.Bold)
 )
-
-
-
-
-
-
-
-

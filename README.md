@@ -4,6 +4,18 @@
 
 Aplicación para la tarea de la asignatura de Programacion Multimedia.
 
+version 5.0
+
+-Creados repositorios para Base de datos Room y API de Retrofit
+
+-Implementacion de UseCases para acceso a repositorios
+
+-Implementada funcionalidad de elimiancion de anuncios, mediante menu desplegable.
+
+-Correguida insercion y preseintacion de anuncios. Si al iniciar la aplicacion la islata de anuncios se vacia, carga el listado de anuncios precargados en el repositorio
+
+-Mejoras de navegación entre pantallas, cohesión de diseño de app entre las diversas partes del app y asignación de funciones a todos los elementos visuales
+
 version 4.0
 
 -Añadidas dependencias de Hilt
